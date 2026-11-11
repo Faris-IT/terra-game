@@ -31,7 +31,7 @@ fac(-9,-1,4,3,0x7a5230,0x2d8c57,2.6,'Compost Center',4.2);fac(6,-6,4.5,3.5,0xe6b
 const tg=CY(.25,.35,2,6),fg=new THREE.ConeGeometry(1.4,3,7);
 let s=7;const R=()=>(s=(s*16807)%2147483647)/2147483647;
 for(let i=0,n=0;i<80&&n<34;i++){const x=(R()-.5)*84,z=(R()-.5)*84;
- if(Math.hypot(x,z)<12||Math.hypot(x,z+14)<10||col.some(c=>Math.hypot(c.x-x,c.z-z)<5.5)||Math.abs(x)<3)continue;
+ if(Math.hypot(x,z)<12||Math.hypot(x,z+14)<10||col.some(c=>Math.hypot(c.x-x,c.z-z)<5.5)||Math.abs(x)<3||x>22||z>20)continue;
  const t=new THREE.Mesh(tg,mat(0x7a5230));t.position.set(x,1,z);sc.add(t);
  const f=new THREE.Mesh(fg,mat(i%2?0x2d8c57:0x3a9e62));f.position.set(x,3.5,z);f.castShadow=true;sc.add(f);col.push({x,z,r:.6});n++}
 /* ===== Karakter prosedural ===== */
@@ -110,13 +110,13 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.05
   P.position.x+=dx*sp2*dt;P.position.z+=dz*sp2*dt;P.rotation.y=Math.atan2(dx,dz);ph+=dt*(keys.shift?12:8)}
  col.forEach(c=>{const dx=P.position.x-c.x,dz=P.position.z-c.z,d=Math.hypot(dx,dz),m=c.r+.45;if(d<m&&d>0){P.position.x=c.x+dx/d*m;P.position.z=c.z+dz/d*m}});
  P.position.x=Math.max(-45,Math.min(45,P.position.x));P.position.z=Math.max(-45,Math.min(45,P.position.z));
- const sw=mv?Math.sin(ph)*.8:0;aL.rotation.x=sw;aR.rotation.x=-sw;lL.rotation.x=-sw;lR.rotation.x=sw;
+ typeof gate==='function'&&gate();const sw=mv?Math.sin(ph)*.8:0;aL.rotation.x=sw;aR.rotation.x=-sw;lL.rotation.x=-sw;lR.rotation.x=sw;
  P.children[0].position.y=1.05+(mv?Math.abs(Math.sin(ph))*.04:Math.sin(n/500)*.015);
  items.forEach((i,k)=>{if(i.alive){i.m.position.y=.35+Math.sin(n/400+k)*.08;i.m.rotation.y+=dt}});
  const tx=P.position.x,ty=1.6,tz=P.position.z;
  cam.position.set(tx+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.6,ty+Math.sin(pitch)*dist),tz+Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(tx,ty,tz);
  sun.position.set(tx+20,30,tz+10);sun.target.position.copy(P.position);
  const nr=ui?null:near(),pe=$('prompt');
- if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: Buka '+nr.s.n:'E: Ambil '+T[nr.o.t].n}else pe.style.display='none';
+ if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: '+(nr.s.v||'Buka')+' '+nr.s.n:'E: Ambil '+T[nr.o.t].n}else pe.style.display='none';
  ren.render(sc,cam)}
 hud();requestAnimationFrame(loop);

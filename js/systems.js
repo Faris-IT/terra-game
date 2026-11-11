@@ -1,6 +1,6 @@
 /* Mufa Terra — Phase 2: kualitas, fasilitas, resep, crafting, distribusi, ekonomi, save/load */
 const SAVE='mufa-terra-save',V=2;
-let coins=30,trust=0,st={},batches={},lastSave=0,noSave=false;
+let coins=30,trust=0,st={},batches={},lastSave=0,noSave=false,booted=false;
 const PN={kompos:'Kompos',pulp:'Pulp kertas',kertas:'Kertas daur ulang',pot:'Pot kreatif'};
 const PR={kompos:12,kertas:20,pot:25},MV={pet:8,kardus:5,kaleng:12,makanan:3,daun:2};
 const REC=[
@@ -8,7 +8,7 @@ const REC=[
 {id:'pulp',f:'paper',n:'Kardus → pulp',inp:{kardus:3},q:{kardus:70},t:15,cost:5,out:{pulp:2},note:'Kardus harus kering dan cukup bersih.'},
 {id:'kertas',f:'paper',n:'Pulp → kertas daur ulang',inp:{pulp:2},q:{},t:30,cost:15,out:{kertas:2},note:'Pulp diproses menjadi lembaran kertas.'},
 {id:'pot',f:'paper',n:'Pot kreatif (penggunaan ulang)',inp:{pet:1,kompos:1},q:{pet:90},t:20,cost:10,out:{pot:1},note:'Penggunaan ulang: wadah bersih dipakai kembali, bukan didaur ulang industri.'}];
-const FN={};ST.forEach(f=>FN[f.id]=f.n);
+const EXT=[],FN={};ST.forEach(f=>FN[f.id]=f.n);
 const nm=k=>(T[k]||{}).n||PN[k]||k,pv=(k,q)=>Math.round((PR[k]||MV[k]||0)*q/100);
 const qc=q=>q>=90?'Bersih':q>=70?'Sedikit kotor':q>=40?'Tercampur':'Terkontaminasi';
 const LN=l=>l<=5?'Eco Beginner':l<=10?'Waste Explorer':'Circular Creator';
@@ -23,9 +23,9 @@ document.head.insertAdjacentHTML('beforeend','<style>button:disabled{opacity:.4;
  m.position.set(x,.35,z);m.castShadow=true;sc.add(m);items.push({t,x,z,m,q:Math.round(rnd(30,100)),alive:true})});
 /* ===== Interaksi ===== */
 function near(){let b=null,bd=2.3;items.forEach(i=>{if(!i.alive)return;const d=Math.hypot(i.x-P.position.x,i.z-P.position.z);if(d<bd){bd=d;b=i}});
- if(b)return{k:'item',o:b};const f=ST.find(f=>Math.hypot(f.x-P.position.x,f.z-P.position.z)<f.r);return f?{k:'st',s:f}:null}
+ if(b)return{k:'item',o:b};const f=EXT.concat(ST).find(f=>Math.hypot(f.x-P.position.x,f.z-P.position.z)<f.r);return f?{k:'st',s:f}:null}
 function act(){if(ui)return;const n=near();if(!n)return;
- if(n.k==='st')return open(n.s.id);
+ if(n.k==='st')return n.s.fn?n.s.fn():open(n.s.id);
  if(inv.length>=CAP)return toast('Tas penuh — bawa ke Pusat Pemilahan');
  const o=n.o;o.alive=false;o.cd=45;sc.remove(o.m);inv.push({t:o.t,q:o.q});toast('Mengambil '+T[o.t].n);
  if(!found[o.t]){found[o.t]=1;xp+=10;toast('Material baru: '+T[o.t].n+' (+10 XP)')}hud()}
@@ -70,13 +70,13 @@ function wareH(fb){let h=`<h2>Gudang Distribusi</h2><p class=sm>Coins ${coins} �
  return h}
 function render(f){const fb=f?`<div class="fb ${f.ok?'ok':'no'}">${f.t}</div>`:'';let h;
  if(ui==='menu')h=`<h2>Menu</h2><p class=sm>Progres tersimpan otomatis di browser ini (localStorage).</p>${fb}<button id=sv>Simpan sekarang</button> <button id=rst class=x>Hapus save &amp; mulai ulang</button><p class=sm>Sampah yang muncul kembali adalah simulasi siklus material. Visual dan angka adalah ilustrasi game.</p>`;
- else if(ui==='ware')h=wareH(fb);else if(ui==='compost'||ui==='paper')h=facH(fb);else h=bagH(ui==='sort',fb);
+ else if(ui==='dlg')h=dlgH(fb);else if(ui==='quests')h=questH(fb);else if(ui==='ware')h=wareH(fb);else if(ui==='compost'||ui==='paper')h=facH(fb);else h=bagH(ui==='sort',fb);
  $('panel').innerHTML=h+'<button class=x id=cl>Tutup</button>';
  const q=s=>$('panel').querySelectorAll(s);$('cl').onclick=close;
  q('[data-k]').forEach(b=>b.onclick=()=>sortIt(+b.dataset.i,b.dataset.k));q('[data-c]').forEach(b=>b.onclick=()=>clean(+b.dataset.c));
  q('[data-r]').forEach(b=>b.onclick=()=>start(b.dataset.r));q('[data-s]').forEach(b=>b.onclick=()=>sell(b.dataset.s));
  q('[data-d]').forEach(b=>b.onclick=()=>donate(b.dataset.d));q('[data-h]').forEach(b=>b.onclick=()=>handover(b.dataset.h));
- if($('cm'))$('cm').onclick=()=>claim(ui);if($('sv'))$('sv').onclick=()=>{save();render({ok:true,t:'Tersimpan.'})};
+ q('[data-dl]').forEach(b=>b.onclick=dlgNext);if($('cm'))$('cm').onclick=()=>claim(ui);if($('sv'))$('sv').onclick=()=>{save();render({ok:true,t:'Tersimpan.'})};
  if($('rst')){let c=0;$('rst').onclick=()=>{if(!c){c=1;$('rst').textContent='Yakin? Klik lagi';return}noSave=true;try{localStorage.removeItem(SAVE);localStorage.removeItem(SAVE+'-bak')}catch(e){}location.reload()}}}
 /* ===== HUD ===== */
 function objective(){if(inv.length)return`Bawa ${inv.length} material ke Pusat Pemilahan (menara biru)`;
@@ -87,8 +87,8 @@ function objective(){if(inv.length)return`Bawa ${inv.length} material ke Pusat P
 function hud(){$('st').textContent=`Lv ${lv()} ${LN(lv())} · XP ${xp} · Coins ${coins} · Trust ${trust} · Tas ${inv.length}/${CAP} · Akurasi ${acc()}%`;
  $('obj').textContent=objective();if(Date.now()-lastSave>3000)save()}
 /* ===== Save / load (versi schema + backup) ===== */
-function save(){if(noSave)return;try{const o=localStorage.getItem(SAVE);if(o)localStorage.setItem(SAVE+'-bak',o);lastSave=Date.now();
- localStorage.setItem(SAVE,JSON.stringify({v:V,p:[P.position.x,P.position.z],xp,coins,trust,inv,st,found,ok,tot,b:batches,it:items.map(i=>[i.alive?1:0,i.q])}))}catch(e){}}
+function save(){if(noSave||!booted)return;try{const o=localStorage.getItem(SAVE);if(o)localStorage.setItem(SAVE+'-bak',o);lastSave=Date.now();
+ localStorage.setItem(SAVE,JSON.stringify({v:V,p:[P.position.x,P.position.z],xp,coins,trust,inv,st,found,ok,tot,b:batches,it:items.map(i=>[i.alive?1:0,i.q]),sy:typeof exportStory==='function'?exportStory():null}))}catch(e){}}
 function load(){const rd=k=>{try{const d=JSON.parse(localStorage.getItem(k));return d&&d.v===V?d:null}catch(e){return null}};
  const d=rd(SAVE)||rd(SAVE+'-bak');if(!d)return false;const n=x=>Number.isFinite(x)?x:0;
  try{xp=n(d.xp);coins=n(d.coins);trust=n(d.trust);ok=n(d.ok);tot=n(d.tot);
@@ -96,7 +96,7 @@ function load(){const rd=k=>{try{const d=JSON.parse(localStorage.getItem(k));ret
  st={};for(const k in d.st||{}){const e=d.st[k];if((T[k]||PN[k])&&e.n>0&&Number.isFinite(e.q))st[k]={n:Math.floor(e.n),q:e.q}}
  found=d.found||{};batches={};for(const f in d.b||{}){const b=d.b[f];if(b&&FN[f]&&REC.some(r=>r.id===b.r))batches[f]={r:b.r,left:n(b.left),q:n(b.q)}}
  (d.it||[]).forEach((a,i)=>{const o=items[i];if(!o)return;o.q=n(a[1]);if(a[0]){if(!o.alive)sc.add(o.m);o.alive=true}else if(o.alive){o.alive=false;sc.remove(o.m);o.cd=20}});
- if(d.p){P.position.x=n(d.p[0]);P.position.z=n(d.p[1])}return true}catch(e){return false}}
+ if(d.p){P.position.x=n(d.p[0]);P.position.z=n(d.p[1])}if(d.sy&&typeof importStory==='function')importStory(d.sy);return true}catch(e){return false}}
 /* ===== Timer game (berhenti saat tab tidak aktif) ===== */
 setInterval(()=>{if(document.hidden)return;let ch=0;
  for(const f in batches){const b=batches[f];if(b.left>0&&--b.left===0){toast(`Batch di ${FN[f]} selesai!`);ch=1}}
