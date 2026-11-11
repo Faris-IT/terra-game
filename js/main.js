@@ -22,6 +22,11 @@ mesh(BX(5,.9,.2),0xf4fbf6,0,2.6,-11.4);
 col.push({x:-2.5,z:-14,r:3},{x:2.5,z:-14,r:3});
 [[-1.8,0x68ba6d],[-.6,0x4ca9cb],[.6,0x888888],[1.8,0xf2905a]].forEach(([x,c])=>{mesh(BX(.9,.9,.9),c,x,.45,-10.6).castShadow=true});
 mesh(CY(1.4,1.4,8,16),0x4ca9cb,0,4,-8.5).material=new THREE.MeshBasicMaterial({color:0x4ca9cb,transparent:true,opacity:.25});
+// Fasilitas (Phase 2)
+const ST=[{id:'sort',n:'Pusat Pemilahan',x:0,z:-10.5,r:4.8},{id:'compost',n:'Compost Center',x:-9,z:-1,r:4.8},{id:'paper',n:'Workshop Kertas & Kreatif',x:6,z:-6,r:4.8},{id:'ware',n:'Gudang Distribusi',x:-4,z:6,r:4.8}];
+function label(t,x,y,z,w=4.5){const c=document.createElement('canvas');c.width=400;c.height=64;const g=c.getContext('2d');g.fillStyle='#10281c';g.fillRect(0,0,400,64);g.fillStyle='#f4fbf6';g.font='bold 26px sans-serif';g.textAlign='center';g.fillText(t,200,42);const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),fog:false}));s.scale.set(w,w*64/400,1);s.position.set(x,y,z);sc.add(s)}
+function fac(x,z,w,d,c,rc,r,t,lw){mesh(BX(w,2.6,d),c,x,1.3,z).castShadow=true;mesh(BX(w+.4,.3,d+.4),rc,x,2.75,z);col.push({x,z,r});label(t,x,3.9,z,lw)}
+fac(-9,-1,4,3,0x7a5230,0x2d8c57,2.6,'Compost Center',4.2);fac(6,-6,4.5,3.5,0xe6b65c,0xc4573a,2.9,'Workshop Kertas & Kreatif',6);fac(-4,6,5,3.5,0xf2905a,0x2d6f8a,3,'Gudang Distribusi',4.6);label('Pusat Pemilahan',0,4.9,-14,4.6);
 // Pohon (geometri dibagi)
 const tg=CY(.25,.35,2,6),fg=new THREE.ConeGeometry(1.4,3,7);
 let s=7;const R=()=>(s=(s*16807)%2147483647)/2147483647;
@@ -49,7 +54,7 @@ residu:{n:'Bungkus plastik kotor',c:'residu',col:0x555555,g:new THREE.Icosahedro
 baterai:{n:'Baterai rumah tangga',c:'b3',col:0xd94a3a,g:CY(.1,.1,.35,8),w:'Baterai adalah B3 rumah tangga; jangan dicampur sampah biasa, serahkan ke pengelola berwenang.'}};
 const types=['pet','kardus','makanan','daun','kaleng','residu','baterai'];
 const sp=[[-4,2],[5,-3],[-9,-4],[10,-8],[-12,12],[14,12],[3,14],[-3,-6],[8,6],[-18,-2],[18,-6],[0,-22],[-10,-16],[12,-20]];
-const items=sp.map(([x,z],i)=>{const t=types[i%7],m=new THREE.Mesh(T[t].g,mat(T[t].col));m.position.set(x,.35,z);m.castShadow=true;sc.add(m);return{t,x,z,m,q:Math.round(rnd(55,100)),alive:true}});
+const items=sp.map(([x,z],i)=>{const t=types[i%7],m=new THREE.Mesh(T[t].g,mat(T[t].col));m.position.set(x,.35,z);m.castShadow=true;sc.add(m);return{t,x,z,m,q:Math.round(rnd(30,100)),alive:true}});
 const qlab=q=>q>=90?'Bersih':q>=70?'Sedikit kotor':q>=40?'Tercampur':'Terkontaminasi';
 /* ===== State ===== */
 const CAP=10;let inv=[],S={organik:0,daur:0,residu:0,b3:0},xp=0,ok=0,tot=0,found={},ui=null;
@@ -85,7 +90,7 @@ function act(){if(ui)return;const n=near();if(!n)return;
  if(!found[o.t]){found[o.t]=1;xp+=10;toast('Material baru: '+T[o.t].n+' (+10 XP)')}hud()}
 /* ===== Input ===== */
 const keys={};let yaw=0,pitch=.5,dist=8,jx=0,jy=0;
-addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(k==='e')act();if(k==='i')ui?close():open('inv');if(k==='escape')close()});
+addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(k==='e')act();if(k==='i')ui?close():open('inv');if(k==='escape')ui?close():open('menu')});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
 const cv=$('c');cv.addEventListener('pointermove',e=>{if(e.buttons&1||e.pointerType==='touch'){yaw-=e.movementX*.005;pitch=Math.min(1.1,Math.max(.15,pitch+e.movementY*.004))}});
 cv.addEventListener('wheel',e=>dist=Math.min(12,Math.max(5,dist+e.deltaY*.01)));
@@ -112,6 +117,6 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.05
  cam.position.set(tx+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.6,ty+Math.sin(pitch)*dist),tz+Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(tx,ty,tz);
  sun.position.set(tx+20,30,tz+10);sun.target.position.copy(P.position);
  const nr=ui?null:near(),pe=$('prompt');
- if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: Buka Pusat Pemilahan':'E: Ambil '+T[nr.o.t].n}else pe.style.display='none';
+ if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: Buka '+nr.s.n:'E: Ambil '+T[nr.o.t].n}else pe.style.display='none';
  ren.render(sc,cam)}
 hud();requestAnimationFrame(loop);
