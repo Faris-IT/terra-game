@@ -92,7 +92,7 @@ function act(){if(ui)return;const n=near();if(!n)return;
 const keys={};let yaw=0,pitch=.5,dist=8,jx=0,jy=0;
 addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=1;if(k==='e')act();if(k==='i')ui?close():open('inv');if(k==='escape')ui?close():open('menu')});
 addEventListener('keyup',e=>keys[e.key.toLowerCase()]=0);
-const cv=$('c');cv.addEventListener('pointermove',e=>{if(e.buttons&1||e.pointerType==='touch'){yaw-=e.movementX*.005;pitch=Math.min(1.1,Math.max(.15,pitch+e.movementY*.004))}});
+const cv=$('c');cv.addEventListener('pointermove',e=>{if(e.buttons&1||e.pointerType==='touch'){const cs=window.camS||1;yaw-=e.movementX*.005*cs;pitch=Math.min(1.1,Math.max(.15,pitch+e.movementY*.004*cs))}});
 cv.addEventListener('wheel',e=>dist=Math.min(12,Math.max(5,dist+e.deltaY*.01)));
 const joy=$('joy'),kn=$('knob');
 function jm(e){const r=joy.getBoundingClientRect();let x=(e.clientX-r.left-55)/40,y=(e.clientY-r.top-55)/40;const l=Math.hypot(x,y);if(l>1){x/=l;y/=l}jx=x;jy=y;kn.style.transform=`translate(${x*30}px,${y*30}px)`}
@@ -112,7 +112,7 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.05
  P.position.x=Math.max(-45,Math.min(45,P.position.x));P.position.z=Math.max(-45,Math.min(45,P.position.z));
  typeof gate==='function'&&gate();const sw=mv?Math.sin(ph)*.8:0;aL.rotation.x=sw;aR.rotation.x=-sw;lL.rotation.x=-sw;lR.rotation.x=sw;
  P.children[0].position.y=1.05+(mv?Math.abs(Math.sin(ph))*.04:Math.sin(n/500)*.015);
- items.forEach((i,k)=>{if(i.alive){i.m.position.y=.35+Math.sin(n/400+k)*.08;i.m.rotation.y+=dt}});
+ items.forEach((i,k)=>{if(i.alive&&!window.rfx){i.m.position.y=.35+Math.sin(n/400+k)*.08;i.m.rotation.y+=dt}});
  const tx=P.position.x,ty=1.6,tz=P.position.z;
  cam.position.set(tx+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.6,ty+Math.sin(pitch)*dist),tz+Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(tx,ty,tz);
  sun.position.set(tx+20,30,tz+10);sun.target.position.copy(P.position);

@@ -69,14 +69,14 @@ function wareH(fb){let h=`<h2>Gudang Distribusi</h2><p class=sm>Coins ${coins} Â
   (p>0?`<button data-s=${k}>Jual semua (+${p*e.n-(PR[k]?5:0)})</button>`:'')+(PR[k]?`<button data-d=${k}>Donasikan 1</button>`:'')+(k==='baterai'||k==='residu'?`<button data-h=${k}>Serahkan</button>`:'')+'</div></div>'});
  return h}
 function render(f){const fb=f?`<div class="fb ${f.ok?'ok':'no'}">${f.t}</div>`:'';let h;
- if(ui==='menu')h=`<h2>Menu</h2><p class=sm>Progres tersimpan otomatis di browser ini (localStorage).</p>${fb}<button id=sv>Simpan sekarang</button> <button id=rst class=x>Hapus save &amp; mulai ulang</button><p class=sm>Sampah yang muncul kembali adalah simulasi siklus material. Visual dan angka adalah ilustrasi game.</p>`;
- else if(ui==='book')h=bookH(fb);else if(ui==='dlg')h=dlgH(fb);else if(ui==='quests')h=questH(fb);else if(ui==='ware')h=wareH(fb);else if(ui==='compost'||ui==='paper')h=facH(fb);else h=bagH(ui==='sort',fb);
+ if(ui==='menu')h=`<h2>Menu</h2><p class=sm>Progres tersimpan otomatis di browser ini (localStorage).</p>${fb}<button data-st="open:0">Pengaturan</button> <button id=sv>Simpan sekarang</button> <button id=rst class=x>Hapus save &amp; mulai ulang</button><p class=sm>Sampah yang muncul kembali adalah simulasi siklus material. Visual dan angka adalah ilustrasi game.</p>`;
+ else if(ui==='set')h=setH(fb);else if(ui==='book')h=bookH(fb);else if(ui==='dlg')h=dlgH(fb);else if(ui==='quests')h=questH(fb);else if(ui==='ware')h=wareH(fb);else if(ui==='compost'||ui==='paper')h=facH(fb);else h=bagH(ui==='sort',fb);
  $('panel').innerHTML=h+'<button class=x id=cl>Tutup</button>';
  const q=s=>$('panel').querySelectorAll(s);$('cl').onclick=close;
  q('[data-k]').forEach(b=>b.onclick=()=>sortIt(+b.dataset.i,b.dataset.k));q('[data-c]').forEach(b=>b.onclick=()=>clean(+b.dataset.c));
  q('[data-r]').forEach(b=>b.onclick=()=>start(b.dataset.r));q('[data-s]').forEach(b=>b.onclick=()=>sell(b.dataset.s));
  q('[data-d]').forEach(b=>b.onclick=()=>donate(b.dataset.d));q('[data-h]').forEach(b=>b.onclick=()=>handover(b.dataset.h));
- q('[data-act]').forEach(b=>b.onclick=()=>bookAct(b.dataset.act));q('[data-dl]').forEach(b=>b.onclick=dlgNext);if($('cm'))$('cm').onclick=()=>claim(ui);if($('sv'))$('sv').onclick=()=>{save();render({ok:true,t:'Tersimpan.'})};
+ q('[data-act]').forEach(b=>b.onclick=()=>bookAct(b.dataset.act));q('[data-st]').forEach(b=>b.onclick=()=>setAct(b.dataset.st));q('[data-dl]').forEach(b=>b.onclick=dlgNext);if($('cm'))$('cm').onclick=()=>claim(ui);if($('sv'))$('sv').onclick=()=>{save();render({ok:true,t:'Tersimpan.'})};
  if($('rst')){let c=0;$('rst').onclick=()=>{if(!c){c=1;$('rst').textContent='Yakin? Klik lagi';return}noSave=true;try{localStorage.removeItem(SAVE);localStorage.removeItem(SAVE+'-bak')}catch(e){}location.reload()}}}
 /* ===== HUD ===== */
 function objective(){if(inv.length)return`Bawa ${inv.length} material ke Pusat Pemilahan (menara biru)`;

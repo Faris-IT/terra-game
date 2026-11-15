@@ -17,9 +17,10 @@ mesh(BX(3,2,2.4),0x7a5230,4,1,22);mesh(BX(3.6,.25,3),0x2d8c57,4,2.1,22);col.push
  const m=new THREE.Mesh(T[t].g,mat(T[t].col));m.position.set(x,.35,z);m.castShadow=true;sc.add(m);items.push({t,x,z,m,q:Math.round(rnd(30,100)),alive:true})});
 /* sampah dekoratif yang berganti bunga saat lingkungan pulih */
 let sd=11;const rr=()=>(sd=(sd*16807)%2147483647)/2147483647,lit=[],flo=[];
+const LG=new THREE.IcosahedronGeometry(.22,0),FG=SP(.2);
 for(let i=0;i<30;i++){let x=0,z=0;for(let k=0;k<20;k++){x=(rr()-.5)*84;z=-30+rr()*48;if(Math.hypot(x,z)>5&&!ST.some(f=>Math.hypot(f.x-x,f.z-z)<4)&&!col.some(c=>Math.hypot(c.x-x,c.z-z)<c.r+1.2))break}
- const L=new THREE.Mesh(new THREE.IcosahedronGeometry(.22,0),mat(i%3?0x555555:0x8fd3f0));L.position.set(x,.2,z);sc.add(L);lit.push(L);
- const F=mesh(SP(.2),[0xf2905a,0xe6b65c,0xf4fbf6][i%3],x,.25,z);F.visible=false;flo.push(F)}
+ const L=new THREE.Mesh(LG,mat(i%3?0x555555:0x8fd3f0));L.position.set(x,.2,z);sc.add(L);lit.push(L);
+ const F=mesh(FG,[0xf2905a,0xe6b65c,0xf4fbf6][i%3],x,.25,z);F.visible=false;flo.push(F)}
 gr.material=new THREE.MeshLambertMaterial({color:0x8fa86a});
 function env(){envP=ok;const p=Math.min(1,ok/40),n=Math.floor(p*lit.length),C=h=>new THREE.Color(h);
  lit.forEach((m,i)=>m.visible=i>=n);flo.forEach((m,i)=>m.visible=i<n);
@@ -38,7 +39,7 @@ function npc(id,n,x,z,c,hc){const g=new THREE.Group();g.position.set(x,0,z);sc.a
  EXT.push({id:'npc:'+id,n,v:'Bicara dengan',x,z,r:2.8,fn:()=>talk(id)})}
 npc('faris','Pak Faris',3,11,0x4ca9cb,0xe6b65c);npc('edukator','Edukator Lingkungan',-5,-8,0x68ba6d,0xf4fbf6);npc('pedagang','Pedagang Pasar',32,0,0xf2905a,0x7a5230);
 EXT.push({id:'bin',n:'Tempat Pengumpulan',v:'Aktifkan',x:26,z:0,r:2.6,fn:()=>{if(binOn)return toast('Tempat pengumpulan sudah aktif');binOn=true;trust+=2;binM.material=mat(0x2d8c57);toast('Tempat pengumpulan pasar aktif (+2 Trust)');hud()}});
-(function nl(){requestAnimationFrame(nl);NP.forEach(g=>{g.rotation.y=Math.atan2(P.position.x-g.position.x,P.position.z-g.position.z);g.position.y=Math.sin(performance.now()/600+g.position.x)*.02})})();
+(function nl(){requestAnimationFrame(nl);NP.forEach(g=>{g.rotation.y=Math.atan2(P.position.x-g.position.x,P.position.z-g.position.z);g.position.y=window.rfx?0:Math.sin(performance.now()/600+g.position.x)*.02})})();
 /* ===== Dialog ===== */
 const FNAME={faris:'Pak Faris — Ketua Komunitas',pedagang:'Pedagang Pasar',edukator:'Edukator Lingkungan'};
 const TIPS=['Kualitas material 0–100: makin bersih dan terpilah, makin mudah diterima fasilitas.','Tidak semua simbol daur ulang diterima semua fasilitas; kondisi, kebersihan, dan jenis material menentukan.','Baterai dan limbah elektronik termasuk B3 rumah tangga; serahkan ke pengelola berwenang, jangan diolah sendiri.','Kompos butuh bahan basah (kaya nitrogen) dan kering (kaya karbon), udara, dan kelembapan yang terjaga.','Pembersihan permukaan belum tentu berarti pencemaran pulih; sebagian kasus perlu pemeriksaan profesional.','Warna air di game hanyalah indikator ilustratif, bukan hasil pengukuran kualitas air.','Mencegah sampah dari sumbernya lebih berkelanjutan daripada mengumpulkannya setelah sampai ke sungai atau laut.'];
