@@ -21,3 +21,5 @@ button.x{background:var(--e);margin-top:8px}
 #mb{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 40px);display:none;flex-direction:column;gap:10px}
 #mb button{width:70px;height:56px;font-size:16px}
 @media (pointer:coarse){#joy{display:block}#mb{display:flex}#help{display:none}#prompt{bottom:170px}}
+
+#panel h3{margin:10px 0 0;font-size:15px}

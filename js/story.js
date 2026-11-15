@@ -72,4 +72,4 @@ setInterval(()=>{ST.forEach(f=>{if(Math.hypot(f.x-P.position.x,f.z-P.position.z)
 function exportStory(){return{qi,base,talked,visited,binOn,tip,un}}
 function importStory(s){try{qi=Math.min(QS.length,Math.max(0,s.qi|0));base=s.base|0;talked=s.talked||{};visited=s.visited||{};binOn=!!s.binOn;tip=s.tip|0;
  un={pasar:s.un&&s.un.pasar?1:0,sungai:s.un&&s.un.sungai?1:0};apply();if(binOn)binM.material=mat(0x2d8c57);envP=-1}catch(e){}}
-booted=true;load();hud();env();qh();
+load();hud();env();qh();

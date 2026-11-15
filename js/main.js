@@ -57,8 +57,8 @@ const sp=[[-4,2],[5,-3],[-9,-4],[10,-8],[-12,12],[14,12],[3,14],[-3,-6],[8,6],[-
 const items=sp.map(([x,z],i)=>{const t=types[i%7],m=new THREE.Mesh(T[t].g,mat(T[t].col));m.position.set(x,.35,z);m.castShadow=true;sc.add(m);return{t,x,z,m,q:Math.round(rnd(30,100)),alive:true}});
 const qlab=q=>q>=90?'Bersih':q>=70?'Sedikit kotor':q>=40?'Tercampur':'Terkontaminasi';
 /* ===== State ===== */
-const CAP=10;let inv=[],S={organik:0,daur:0,residu:0,b3:0},xp=0,ok=0,tot=0,found={},ui=null;
-const lv=()=>1+Math.floor(xp/40),acc=()=>tot?Math.round(ok/tot*100):0;
+let CAP=10;let inv=[],S={organik:0,daur:0,residu:0,b3:0},xp=0,ok=0,tot=0,found={},ui=null;
+const lv=()=>1+Math.floor(Math.pow(xp/25,.75)),acc=()=>tot?Math.round(ok/tot*100):0;
 function hud(){const left=items.filter(i=>i.alive).length;
  $('st').textContent=`Lv ${lv()} Eco Beginner · XP ${xp} · Tas ${inv.length}/${CAP} · Akurasi ${acc()}%`;
  $('obj').textContent=inv.length?`Bawa ${inv.length} material ke Pusat Pemilahan (menara biru)`:left?`Kumpulkan sampah di kampung (${left} tersisa)`:'Semua sampah terpilah! Prototype Phase 1 tercapai.'}
@@ -117,6 +117,6 @@ function loop(n){requestAnimationFrame(loop);const dt=Math.min((n-last)/1000,.05
  cam.position.set(tx+Math.sin(yaw)*Math.cos(pitch)*dist,Math.max(.6,ty+Math.sin(pitch)*dist),tz+Math.cos(yaw)*Math.cos(pitch)*dist);cam.lookAt(tx,ty,tz);
  sun.position.set(tx+20,30,tz+10);sun.target.position.copy(P.position);
  const nr=ui?null:near(),pe=$('prompt');
- if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: '+(nr.s.v||'Buka')+' '+nr.s.n:'E: Ambil '+T[nr.o.t].n}else pe.style.display='none';
+ if(nr){pe.style.display='block';pe.textContent=nr.k==='st'?'E: '+(nr.s.v||'Buka')+' '+nr.s.n:'E: Ambil '+T[nr.o.t].n+(typeof iq==='function'?iq(nr.o):'')}else pe.style.display='none';
  ren.render(sc,cam)}
 hud();requestAnimationFrame(loop);
